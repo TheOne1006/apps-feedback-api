@@ -14,7 +14,7 @@ import * as path from 'path';
 describe('FeedbacksService', () => {
   let service: FeedbacksService;
   const mockFs = fs as jest.Mocked<typeof fs>;
-  const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
+  const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

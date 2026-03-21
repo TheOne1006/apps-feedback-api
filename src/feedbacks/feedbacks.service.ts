@@ -17,7 +17,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { CreateFeedbackDto } from './dtos';
 
-const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
+const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
 
 @Injectable()
 export class FeedbacksService {
