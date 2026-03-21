@@ -1,0 +1,17 @@
+node_modules
+.vscode
+.nyc_output
+coverage
+dist
+log
+.git
+Dockerfile
+docker-compose.yml
+databases/db/
+documentation
+.github
+resources
+client
+public/uploads
+pem
+node_modules

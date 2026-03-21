@@ -1,0 +1,12 @@
+version: '3.1'
+services:
+  poker-scan-nestjs-server:
+      build: './'
+      ports:
+        - '3001:3000'
+      volumes:
+        - '/etc/localtime:/etc/localtime:ro'
+        - './.env:/usr/app/.env:ro'
+        - './public/uploads:/usr/app/public/upload:rw'
+        - './pem:/usr/app/pem:ro'
+
