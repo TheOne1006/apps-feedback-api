@@ -7,5 +7,5 @@ services:
       volumes:
         - '/etc/localtime:/etc/localtime:ro'
         - './.env:/usr/app/.env:ro'
-        - './public/uploads:/usr/app/public/upload:rw'
+        - './public/uploads:/usr/app/public/uploads:rw'
 
