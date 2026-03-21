@@ -111,6 +111,7 @@ describe('Feedbacks (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/feedback')
         .field('content', 'This is a test feedback')
+        .field('appName', 'TestApp')
         .field('device_id', 'e2e-test-device')
         .field('contact', 'test@example.com')
         .expect(201);
@@ -124,6 +125,7 @@ describe('Feedbacks (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/feedback')
         .field('device_id', 'e2e-test-missing-content')
+        .field('appName', 'TestApp')
         .expect(400);
 
       expect(response.body.statusCode).toBe(400);
@@ -135,6 +137,7 @@ describe('Feedbacks (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/feedback')
         .field('content', longContent)
+        .field('appName', 'TestApp')
         .field('device_id', 'e2e-test-invalid-length')
         .expect(400);
 
@@ -145,6 +148,7 @@ describe('Feedbacks (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/feedback')
         .field('content', 'Valid content')
+        .field('appName', 'TestApp')
         .expect(400);
 
       expect(response.body.statusCode).toBe(400);
@@ -156,6 +160,7 @@ describe('Feedbacks (e2e)', () => {
         await request(app.getHttpServer())
           .post('/api/v1/feedback')
           .field('content', `Feedback ${i}`)
+          .field('appName', 'TestApp')
           .field('device_id', 'e2e-test-ratelimit')
           .expect(201);
       }
@@ -164,6 +169,7 @@ describe('Feedbacks (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/feedback')
         .field('content', 'Feedback 4')
+        .field('appName', 'TestApp')
         .field('device_id', 'e2e-test-ratelimit')
         .expect(429);
 
@@ -175,6 +181,7 @@ describe('Feedbacks (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/feedback')
         .field('content', 'a'.repeat(100))
+        .field('appName', 'TestApp')
         .field('device_id', 'e2e-test-boundary')
         .expect(201);
 
@@ -186,6 +193,7 @@ describe('Feedbacks (e2e)', () => {
         const response = await request(app.getHttpServer())
           .post('/api/v1/feedback')
           .field('content', 'Feedback with image')
+          .field('appName', 'TestApp')
           .field('device_id', 'e2e-test-image-upload')
           .attach('images', MINIMAL_JPEG, { filename: 'test.jpg', contentType: 'image/jpeg' })
           .expect(201);
@@ -204,6 +212,7 @@ describe('Feedbacks (e2e)', () => {
         const response = await request(app.getHttpServer())
           .post('/api/v1/feedback')
           .field('content', 'Feedback with multiple images')
+          .field('appName', 'TestApp')
           .field('device_id', 'e2e-test-image-upload')
           .attach('images', MINIMAL_JPEG, { filename: 'test1.jpg', contentType: 'image/jpeg' })
           .attach('images', MINIMAL_JPEG, { filename: 'test2.jpg', contentType: 'image/jpeg' })
@@ -223,6 +232,7 @@ describe('Feedbacks (e2e)', () => {
         const response = await request(app.getHttpServer())
           .post('/api/v1/feedback')
           .field('content', 'Feedback with png')
+          .field('appName', 'TestApp')
           .field('device_id', 'e2e-test-image-invalid')
           .attach('images', MINIMAL_PNG, { filename: 'test.png', contentType: 'image/png' })
           .expect(400);
@@ -237,6 +247,7 @@ describe('Feedbacks (e2e)', () => {
         const response = await request(app.getHttpServer())
           .post('/api/v1/feedback')
           .field('content', 'Too many images')
+          .field('appName', 'TestApp')
           .field('device_id', 'e2e-test-image-overlimit')
           .attach('images', tinyJpeg, { filename: 'test1.jpg', contentType: 'image/jpeg' })
           .attach('images', tinyJpeg, { filename: 'test2.jpg', contentType: 'image/jpeg' })
@@ -257,6 +268,7 @@ describe('Feedbacks (e2e)', () => {
         const response = await request(app.getHttpServer())
           .post('/api/v1/feedback')
           .field('content', 'Large image')
+          .field('appName', 'TestApp')
           .field('device_id', 'e2e-test-image-too-large')
           .attach('images', largeBuffer, { filename: 'large.jpg', contentType: 'image/jpeg' })
           .expect(413);

@@ -32,7 +32,7 @@ describe('FeedbacksController', () => {
 
   describe('create', () => {
     it('should return 201 with feedback data', async () => {
-      const dto = { content: 'Test', device_id: 'device-123' };
+      const dto = { content: 'Test', appName: 'TestApp', device_id: 'device-123' };
       const mockResult = { id: 'test-id', created_at: '2026-03-21T00:00:00.000Z' };
       (mockService.createFeedback as jest.Mock).mockResolvedValue(mockResult);
 
@@ -46,7 +46,7 @@ describe('FeedbacksController', () => {
     });
 
     it('should call service with correct params', async () => {
-      const dto = { content: 'Test', device_id: 'device-123' };
+      const dto = { content: 'Test', appName: 'TestApp', device_id: 'device-123' };
       (mockService.createFeedback as jest.Mock).mockResolvedValue({ id: '1', created_at: 'now' });
 
       await controller.create(dto, { images: [] });
@@ -58,7 +58,7 @@ describe('FeedbacksController', () => {
     });
 
     it('should pass images to service', async () => {
-      const dto = { content: 'Test', device_id: 'device-123' };
+      const dto = { content: 'Test', appName: 'TestApp', device_id: 'device-123' };
       const mockImages = [{ buffer: Buffer.from('img') }] as Express.Multer.File[];
       (mockService.createFeedback as jest.Mock).mockResolvedValue({ id: '1', created_at: 'now' });
 
@@ -71,7 +71,7 @@ describe('FeedbacksController', () => {
     });
 
     it('should handle service errors', async () => {
-      const dto = { content: 'Test', device_id: 'device-123' };
+      const dto = { content: 'Test', appName: 'TestApp', device_id: 'device-123' };
       (mockService.createFeedback as jest.Mock).mockRejectedValue(
         new HttpException('Rate limit exceeded', 429)
       );

@@ -1,6 +1,7 @@
 export interface FeedbackEntry {
   id: string;
   content: string;
+  appName: string;
   contact?: string;
   images: string[];
   created_at: string;
@@ -25,7 +26,7 @@ export class FeedbacksService {
     dto: CreateFeedbackDto,
     images: Express.Multer.File[],
   ): Promise<{ id: string; created_at: string }> {
-    const { device_id, content, contact } = dto;
+    const { device_id, content, appName, contact } = dto;
     const id = uuidv4();
     const created_at = new Date().toISOString();
 
@@ -56,6 +57,7 @@ export class FeedbacksService {
     const feedbackEntry: FeedbackEntry = {
       id,
       content,
+      appName,
       contact,
       images: imageFilenames,
       created_at,

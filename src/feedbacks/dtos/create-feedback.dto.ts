@@ -13,6 +13,17 @@ export class CreateFeedbackDto {
   @Length(1, 100)
   content: string;
 
+  @ApiProperty({
+    description: 'Application name',
+    minLength: 1,
+    maxLength: 50,
+    example: 'MyApp',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 50)
+  appName: string;
+
   @ApiPropertyOptional({
     description: 'Contact information (optional)',
     maxLength: 50,

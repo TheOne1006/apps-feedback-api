@@ -1,14 +1,12 @@
-# NestJS Startkit
+# Apps Feedback API
 
-A robust NestJS boilerplate with Prisma, PostgreSQL, Authentication, and best practices.
+A NestJS-based user feedback backend service with image upload, rate limiting, and Swagger documentation.
 
 ## Tech Stack
 
 - **Framework**: NestJS 11+
 - **Language**: TypeScript 5.9+
-- **Database**: PostgreSQL
-- **ORM**: Prisma 7.2+
-- **Authentication**: JWT, Bcrypt
+- **Storage**: JSON file storage (`public/uploads/`)
 - **Validation**: class-validator, class-transformer
 - **Logging**: Winston (nest-winston)
 - **Documentation**: Swagger
@@ -17,69 +15,49 @@ A robust NestJS boilerplate with Prisma, PostgreSQL, Authentication, and best pr
 ## Project Structure
 
 ```text
-my-nestjs-startkit/
+apps-feedback-api/
 ├── config/               # Environment-specific configurations
-├── prisma/               # Prisma schema and seed scripts
+├── public/
+│   └── uploads/          # Feedback data (JSON) and uploaded images
 ├── src/
-│   ├── common/           # Shared utilities (auth, decorators, interceptors, pipes)
+│   ├── common/           # Shared utilities (decorators, interceptors, pipes, interfaces)
 │   ├── core/             # Core modules (logger, filters, global interceptors)
-│   ├── users/            # Feature module: Users
+│   ├── feedbacks/        # Feature module: Feedback submission + rate limiting
 │   ├── app.module.ts     # Root module
 │   └── main.ts           # Application entry point
-├── test/                 # E2E tests
-└── .claude/              # Documentation (future use)
-```
+└── test/                 # E2E tests
 
 ## Commands
 
 ```bash
 # Development
-npm run dev             # Start in watch mode
-npm run start:debug     # Start in debug mode
-
-# Database (Prisma)
-npm run prisma:generate # Generate Prisma Client
-npm run migrate:dev     # Run migrations (dev)
-npm run migrate:deploy  # Deploy migrations (prod)
-npm run prisma:studio   # Open Prisma Studio
+npm run start:dev        # Start in watch mode
+npm run start:debug      # Start in debug mode
 
 # Testing
-npm test                # Run unit tests
-npm run test:e2e        # Run E2E tests
-npm run test:cov        # Run coverage
+npm test                 # Run unit tests
+npm run test:e2e         # Run E2E tests
+npm run test:cov         # Run coverage
 
 # Quality
-npm run lint            # Lint code
-npm run format          # Format code
+npm run lint             # Lint code
+npm run format           # Format code
 ```
-
-## Reference Documentation
-Read these documents when working on specific areas:
-
-| Document         | When to Read                                   |
-| ---------------- | ---------------------------------------------- |
-| `.claude/PRD.md` | Understanding requirements, features, API spec |
-| `.claude/reference/deployment-best-practices.md` | Deployment, Docker, PM2, Health Checks |
-| `.claude/reference/nestjs-best-practices.md` | Architecture, Modules, Dependency Injection, Guards |
-| `.claude/reference/prisma-postgresql-best-practices.md` | Database schema, Migrations, N+1 issues, Transactions |
-| `.claude/reference/testing-and-logging.md` | Unit/E2E testing strategies, Winston logging standards |
-
 
 ## Code Conventions
 
 - **Architecture**: Modular architecture (Feature Modules + Core/Common).
-- **Naming**: 
+- **Naming**:
   - Files: Kebab-case (e.g., `user.service.ts`)
   - Classes: PascalCase (e.g., `UserService`)
   - Interfaces: PascalCase (e.g., `RequestUser`)
 - **Validation**: Use DTOs with `class-validator` decorators for all inputs.
-- **Authentication**: Use `AuthGuard` and `RolesGuard` for protecting endpoints.
-- **Decorators**: Use custom decorators (e.g., `@User()`, `@Roles()`) from `src/common/decorators`.
+- **Decorators**: Use custom decorators (e.g., `@User()`, `@Response()`, `@FileExist()`) from `src/common/decorators`.
 - **Response**: All responses are wrapped using `WrapResponceInterceptor`.
 
 ## API Design
 
-- **Prefix**: API endpoints typically use `api/` prefix (e.g., `api/users`).
+- **Prefix**: API endpoints use `api/` prefix (e.g., `api/v1/feedback`).
 - **Documentation**: Swagger UI available at `/api` (configurable in config).
 - **Response Format**: JSON
   ```json
@@ -100,34 +78,35 @@ Read these documents when working on specific areas:
   - Production: Configurable (File/Console).
 - **Usage**: Inject `Logger` service or use standard `Logger`.
 
-## Database
+## Storage
 
-- **Engine**: PostgreSQL
-- **ORM**: Prisma
-- **Schema**: `prisma/schema.prisma`
-- **Tables**:
-  - `users`: User accounts and roles.
-- **Configuration**: Connection string in `.env` (DATABASE_URL).
+- **Feedback Data**: JSON files stored at `public/uploads/{device_id}.json`
+- **Images**: Stored at `public/uploads/{device_id}/` with UUID filenames
+- **Rate Limiting**: In-memory (IP-based + device ID-based, 3 requests per 30 minutes)
 
 ## Testing
 
 - **Framework**: Jest
-- **Unit Tests**: 
-  - Logic verification for Services and Helpers.
-  - Mock external dependencies.
-- **E2E Tests**: 
+- **Unit Tests**:
+  - Logic verification for Services, Guards, Controllers.
+  - Mock external dependencies (fs, path).
+- **E2E Tests**:
   - Verify full API flow.
-  - Use `supertest` with a test database environment.
+  - Use `supertest`.
 
 ## Test Organization
 
 ```text
 src/
-└── users/
-    ├── users.service.ts
-    └── __tests__/             # Or colocated *.spec.ts
-        └── users.service.spec.ts
+├── feedbacks/
+│   ├── __tests__/
+│   │   ├── feedbacks.controller.spec.ts
+│   │   ├── feedbacks.service.spec.ts
+│   │   └── feedbacks.guard.spec.ts
+│   ├── feedbacks.controller.ts
+│   └── feedbacks.service.ts
 test/
 ├── app.e2e-spec.ts           # E2E tests for App
+├── feedbacks.e2e-spec.ts     # E2E tests for Feedbacks
 └── jest-e2e.json             # E2E configuration
 ```

@@ -1,34 +1,60 @@
-# NestJS Startkit
+# Apps Feedback API
 
-这是一个基于 NestJS 框架的轻量级后端启动套件 (Startkit)，旨在帮助开发者快速搭建基于 PostgreSQL 和 Prisma 的后端服务。
+一个基于 NestJS 的用户反馈后端服务，支持提交反馈内容、联系方式和图片附件。
 
-## 🎯 重构目标与变更 (Refactoring Goals & Changes)
+## 功能特性
 
-本项目最近进行了深度重构，目的是剥离具体的业务逻辑，回归纯净的开发脚手架。主要变更如下：
+- **反馈提交**: `POST /api/v1/feedback` — 提交用户反馈，支持图片上传
+- **图片支持**: JPEG、PNG、GIF、WebP，单文件最大 10MB，最多 3 张
+- **频率限制**: 基于设备 ID 的反馈提交频率限制（每分钟最多 3 次）
+- **CORS**: 已配置 apps.theone.io、apps.ai-scan.top 及本地开发域名
+- **Swagger 文档**: 启用 Bearer JWT 认证，文档地址 `/api`
+- **日志**: Winston 结构化日志，支持多环境配置
+- **文件存储**: JSON 文件存储，每个设备一个 JSON 文件，图片保存在 `public/uploads/{device_id}/`
 
-1.  **精简模型与模块**：
-    -   ❌ 移除了多余的业务模型和模块：`purchases`, `games`, `feedback`, `chat`, `base-feedback`。
-    -   ✅ 仅保留了基础的 `User` 模型，作为用户系统的核心。
+## 技术栈
 
-2.  **清理配置与依赖**：
-    -   ❌ 移除了不通用的业务配置：RSA 加密、Flowise、Dify、Assistant、Apple 登录配置等。
-    -   🗑️ 清理了 `config.default.ts` 和 `.env.example` 中的冗余项。
+- **框架**: NestJS 11
+- **语言**: TypeScript 5.9+
+- **存储**: JSON 文件（`public/uploads/`）
+- **认证**: JWT Bearer Token（预留）
+- **文档**: Swagger
+- **日志**: Winston + nest-winston
+- **验证**: class-validator + class-transformer
 
-3.  **ORM 迁移与数据库升级**：
-    -   🔄 **Sequelize -> Prisma**：完全替换了原有的 Sequelize ORM，拥抱类型安全更佳的 Prisma。
-    -   🐘 **Database**：后端数据库统一为 PostgreSQL。
-    -   🚀 **Prisma 7.2.0**：使用了最新的 Prisma 7.2.0 版本，并配置了 `@prisma/adapter-pg` 以获得更好的性能和兼容性。
+## 项目结构
 
-## ✨ 特性 (Features)
+```
+apps-feedback-api/
+├── config/                    # 环境配置（default, development, production, unittest）
+├── public/
+│   └── uploads/               # 上传文件存储目录
+├── src/
+│   ├── app.controller.ts     # 根路由
+│   ├── app.service.ts
+│   ├── app.module.ts
+│   ├── main.ts               # 应用入口
+│   ├── common/               # 公共模块
+│   │   ├── constants/        # 常量定义
+│   │   ├── decorators/       # 自定义装饰器 (@User, @Roles, @Response, @FileExist)
+│   │   ├── interfaces/       # 接口定义
+│   │   ├── interceptors/     # 拦截器（SerializerInterceptor）
+│   │   └── pipes/            # 管道（ParseInt, ParseArrayInt, ParseJson）
+│   ├── core/                  # 核心模块
+│   │   ├── filters/          # 全局异常过滤器
+│   │   ├── interceptors/     # 全局拦截器（Logging, Cache, WrapResponce）
+│   │   └── logger/           # Winston 日志配置
+│   └── feedbacks/            # 反馈模块
+│       ├── dtos/             # 数据传输对象
+│       ├── feedbacks.controller.ts
+│       ├── feedbacks.service.ts
+│       ├── feedbacks.guard.ts  # 频率限制 Guard
+│       └── __tests__/         # 单元测试
+└── Dockerfile
+└── docker-compose.yml
+```
 
--   **核心框架**: NestJS v11
--   **ORM**: Prisma v7.2.0 (配合 PostgreSQL Adapter)
--   **数据库**: PostgreSQL
--   **API 文档**: 集成 Swagger 自动生成文档
--   **鉴权**: 基于 JWT 的用户认证系统
--   **容器化**: 提供 Dockerfile 和 docker-compose.yml 支持
-
-## 🛠️ 快速开始 (Getting Started)
+## 快速开始
 
 ### 1. 安装依赖
 
@@ -38,31 +64,20 @@ npm install
 
 ### 2. 配置环境变量
 
-复制示例配置文件并填入你的数据库信息：
-
 ```bash
 cp .env.example .env
 ```
 
-在 `.env` 中修改 `DATABASE_URL`：
+`.env` 示例：
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/mydb?schema=public"
+PORT=3000
+DOC_SWAGGE=true
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=30d
 ```
 
-### 3. 数据库初始化
-
-使用 Prisma 同步数据库架构：
-
-```bash
-# 生成 Prisma Client
-npx prisma generate
-
-# 推送 Schema 到数据库
-npx prisma db push
-```
-
-### 4. 启动项目
+### 3. 启动项目
 
 ```bash
 # 开发模式
@@ -73,16 +88,63 @@ npm run build
 npm run start:prod
 ```
 
-## 🐳 Docker 运行
+启动后访问 Swagger 文档：`http://localhost:3000/api`
+
+## API 文档
+
+### 提交反馈
+
+```
+POST /api/v1/feedback
+Content-Type: multipart/form-data
+```
+
+| 字段      | 类型     | 必填 | 说明                    |
+|-----------|----------|------|-------------------------|
+| content   | string   | 是   | 反馈内容（1-100 字符）   |
+| device_id | string   | 是   | 设备标识符               |
+| contact   | string   | 否   | 联系方式（最多 50 字符）  |
+| images    | File[]   | 否   | 图片（最多 3 张，10MB/张）|
+
+**响应示例：**
+
+```json
+{
+  "code": 201,
+  "message": "Feedback submitted successfully",
+  "data": {
+    "id": "uuid-here",
+    "created_at": "2026-03-21T10:00:00.000Z"
+  }
+}
+```
+
+## Docker 部署
 
 ```bash
 docker-compose up -d
 ```
 
-## 📝 API 文档
+服务将在 `0.0.0.0:3001` 启动（映射到容器内 3000 端口）。
 
-启动项目后，访问 Swagger 文档：
+## 测试
 
+```bash
+# 单元测试
+npm test
+
+# 覆盖率
+npm run test:cov
+
+# E2E 测试
+npm run test:e2e
 ```
-http://localhost:3000/api/docs
-```
+
+## 环境配置
+
+| 文件                  | 用途       |
+|-----------------------|------------|
+| `config.default.ts`   | 默认配置   |
+| `config.development.ts` | 开发环境   |
+| `config.production.ts`  | 生产环境   |
+| `config.unittest.ts`  | 测试环境   |

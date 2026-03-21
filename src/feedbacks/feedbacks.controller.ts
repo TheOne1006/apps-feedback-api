@@ -4,7 +4,6 @@ import {
   Body,
   UseInterceptors,
   UploadedFiles,
-  BadRequestException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiConsumes, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -34,6 +33,7 @@ export class FeedbacksController {
       type: 'object',
       properties: {
         content: { type: 'string', description: 'Feedback content', minLength: 1, maxLength: 100 },
+        appName: { type: 'string', description: 'Application name', minLength: 1, maxLength: 50 },
         contact: { type: 'string', description: 'Contact information (optional)', maxLength: 50 },
         device_id: { type: 'string', description: 'Device identifier' },
         images: {
@@ -42,7 +42,7 @@ export class FeedbacksController {
           description: 'Images (JPEG, PNG, GIF, WebP; up to 3 files, max 10MB each)',
         },
       },
-      required: ['content', 'device_id'],
+      required: ['content', 'appName', 'device_id'],
     },
   })
   @UseInterceptors(
