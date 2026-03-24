@@ -21,7 +21,18 @@ export class FeedbackRateLimitGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const requestBody = request.body || {};
     const { device_id } = requestBody;
-    const ip = request.ip || request.socket?.remoteAddress;
+
+    // 获取真实客户端 IP (优先检查反向代理的请求头)
+    const xForwardedFor = request.headers['x-forwarded-for'];
+    const xRealIp = request.headers['x-real-ip'];
+
+    let ip = request.ip || request.socket?.remoteAddress;
+    
+    if (xForwardedFor) {
+      ip = typeof xForwardedFor === 'string' ? xForwardedFor.split(',')[0].trim() : xForwardedFor[0].trim();
+    } else if (xRealIp) {
+      ip = typeof xRealIp === 'string' ? xRealIp.trim() : xRealIp[0].trim();
+    }
 
     // 1. Device ID Check (from JSON file)
     if (device_id) {
