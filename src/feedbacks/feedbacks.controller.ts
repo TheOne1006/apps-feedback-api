@@ -65,10 +65,6 @@ export class FeedbacksController {
     @UploadedFiles() files: { images?: Express.Multer.File[] },
   ) {
     const result = await this.feedbacksService.createFeedback(dto, files.images || []);
-    return {
-      code: 201,
-      message: 'Feedback submitted successfully',
-      data: result,
-    };
+    return result;
   }
 }
