@@ -76,6 +76,7 @@ export class FeedbackRateLimitGuard implements CanActivate {
       const oldest = entries[0];
       const remainingMs = RATE_LIMIT_WINDOW_MS - (now - oldest);
       const remainingMinutes = Math.ceil(remainingMs / 60000);
+      console.warn(`IP ${ip} hit rate limit. Retry in ${remainingMinutes} minutes.`);
       throw new HttpException(
         `Too many requests. Try again in ${remainingMinutes} minutes.`,
         HttpStatus.TOO_MANY_REQUESTS,
