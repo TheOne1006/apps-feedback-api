@@ -54,6 +54,7 @@ export class FeedbackRateLimitGuard implements CanActivate {
       const feedbackFile = JSON.parse(data);
       const recentCount = this.countRecentFeedbacks(feedbackFile.feedbacks);
       if (recentCount >= RATE_LIMIT_MAX) {
+        console.warn(`Device ${device_id} hit rate limit. Recent count: ${recentCount}`);
         throw new HttpException(
           'Too many requests. Please try again later.',
           HttpStatus.TOO_MANY_REQUESTS,
